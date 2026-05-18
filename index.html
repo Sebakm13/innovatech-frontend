@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Innovatech Chile - Frontend</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #eef2f3; padding: 50px; }
+        .box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block; }
+        h1 { color: #003366; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Innovatech Chile 🚀</h1>
+        <p>Capa de Presentación corriendo en la Subred Pública (Puerto 80).</p>
+        <div id="contenido-api">Conectando con el servicio privado...</div>
+    </div>
+
+    <script>
+        // Llama al backend en el puerto 8080 para verificar la conexión
+        fetch('http://localhost:8080/api/datos')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('contenido-api').innerHTML = `<p style="color: green; font-weight: bold;">Backend dice: ${data.mensaje}</p>`;
+            })
+            .catch(err => {
+                document.getElementById('contenido-api').innerHTML = `<p style="color: red;">Esperando conexión con el Backend en subred privada...</p>`;
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+name: Pipeline CI/CD Frontend
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar código fuente
+        uses: actions/checkout@v3
+
+      - name: Login en Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Construir imagen Docker
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/innovatech-frontend:latest .
+
+      - name: Publicar imagen en Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/innovatech-frontend:latest
+
+  deploy-to-aws:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conectarse por SSH a EC2 y desplegar
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo docker stop con-frontend || true
+            sudo docker rm con-frontend || true
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/innovatech-frontend:latest
+            sudo docker run -d --name con-frontend -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/innovatech-frontend:latest
